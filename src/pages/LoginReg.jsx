@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from 'react'
 import axios from 'axios';
-import { UserContext } from './context/userContext';
+import { UserContext } from '../context/userContext';
 import Cookies from 'universal-cookie';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -27,9 +27,10 @@ const App = () => {
     }, header)
       .then(res => {
         if (res.status === 201 || res.status === 200) {
-          cookies.set("x-auth-token", res.data)
+          cookies.set("x-auth-token", res.data);
+          localStorage.setItem("user", 'true');
           Swal.fire({
-            title: "Register is successfull",
+            title: "Login is successfull",
             icon: "success",
             preConfirm: () => { navigate('/') }
           })
@@ -37,17 +38,21 @@ const App = () => {
         console.log(res.data)
       })
       .catch(err => console.log(err))
-  }
+    }
 
   const registerSubmit = (e) => {
     e.preventDefault();
-    axios.put(`${endPoint}/register`, {
-      email: emailRef.current.value,
-      password: passwordRef.current.value
+    axios.post(`${endPoint}/register`, {
+      name: regNameRef.current.value,
+      surname: regSnameRef.current.value,
+      email: regEmailRef.current.value,
+      phone: regNumRef.current.value,
+      password: regPassRef.current.value
     }, header)
       .then(res => {
         if (res.status === 201 || res.status === 200) {
-          cookies.set("x-auth-token", res.data)
+          cookies.set("x-auth-token", res.data);
+          localStorage.setItem("user", 'true');
           Swal.fire({
             title: "Register is successfull",
             icon: "success",
@@ -56,7 +61,27 @@ const App = () => {
         }
         console.log(res.data)
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        console.log(err);
+
+        if (err.status === 400 || err.status === 401) {
+          let alertText = "";
+          if (err.response.data.match("password")) {
+            alertText = err.response.data
+          } else if (err.response.data.match("empty")) {
+            alertText = err.response.data
+          } else if (err.response.data.match("email")) {
+            alertText = err.response.data
+          }
+          else if (err.response.data.match("already")) {
+            alertText = err.response.data
+          }
+          Swal.fire({
+            title: alertText,
+            icon: "error"
+          })
+        }
+      })
   }
 
   return (
