@@ -85,7 +85,7 @@ const App = () => {
   }
 
   return (
-    <div className='account-info'>
+    <div className='account-info'>z
       <div className={active ? "active container" : "container"}>
 
         <div className="form-container sign-up">
